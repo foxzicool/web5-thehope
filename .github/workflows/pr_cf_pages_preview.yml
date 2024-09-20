@@ -1,0 +1,56 @@
+name: Upload Preview Build to Cloudflare Pages
+
+on:
+  workflow_run:
+    workflows: [CI]
+    # NOTE: All non-`main` branches will be marked as preview build by CF Pages
+    branches-ignore:
+      - main
+    types:
+      - completed
+
+env:
+  NODE_VERSION: 20.x
+
+jobs:
+  build_and_deploy_preview:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+      pull_request: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Setup
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: NITRO_PRESET=cloudflare_pages yarn nuxi build
+
+      - name: Deploy to Cloudflare Pages
+        id: deployment
+        uses: cloudflare/pages-action@v1
+        with:
+          projectName: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          directory: ./dist
+          wranglerVersion: '3'
+
+      - name: Comment Site URL to PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ${{ steps.deployment.outputs }}
+          pr_number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          comment_tag: deployment_result
