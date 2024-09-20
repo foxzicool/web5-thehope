@@ -8,10 +8,5 @@ export default defineNuxtConfig({
     typeCheck: true,
   },
 
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/test-utils/module',
-    'vuetify-nuxt-module',
-    '@nuxtjs/strapi',
-  ],
+  modules: ['@nuxt/eslint', '@nuxt/test-utils/module', 'vuetify-nuxt-module'],
 });

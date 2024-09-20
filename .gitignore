@@ -30,3 +30,5 @@ logs
 .features-gen
 playwright-report
 test-results
+
+*storybook.log
