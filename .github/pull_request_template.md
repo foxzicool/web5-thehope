@@ -19,7 +19,7 @@
 
 ## Tests | 測試
 
-<!-- How was this tested? Manually, test code, local or remotely? | 敘述更動是如何被測試的 -->
+123
 
 ## Misc | 其餘
 
